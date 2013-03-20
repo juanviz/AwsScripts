@@ -9,12 +9,13 @@ tmpFile="/tmp/ec2.info"
 tmpFile2="/tmp/ec2tags.info"
 tmpFile3="/tmp/ec2volumes.info"
 #menu for user
-echo -n "Choose your option 1,2,3,4 "
+echo "Choose the environment that you want to get a instances inventory 1,2,3 "
 echo "1. Prod"
 echo "2. Staging"
 echo "3. Dev"
+echo "if you want to make a volume snapshot after get the instances lists of the environment execute ec2-create-snapshot putherevol-id --description "Daily Backup""
 read answer
-echo "Your choice have been $answer"
+echo "Searching instances"
 #set the keypair regarding to the choice of the user
 case $answer in
 	1) keypair=$keypairprod;; 
@@ -35,9 +36,6 @@ ec2Info= $(ec2-describe-instances |grep INSTANCE | egrep $keypair| awk {'print $
  you=`whoami`
 echo "The instances you have, by hostname, are as follows ..."
 echo "You have $numOfInstances instances running  that fit in your search running"
-echo "*******************************************************"
-echo "Instance name - status - IP - instance ID - Size - Keypair - Volumes"
-echo "*******************************************************"
  for instance in $nstances
  do
 	#get the fields that we want for each instance
@@ -52,6 +50,11 @@ echo "*******************************************************"
         #prodapp-type2-smp5 -  running - 10.234.3.76 - i-8b12fcf9 - m1.xlarge stapp
 	#volumes=`ec2-describe-instance-attribute $instance -b`
 	volumes=`cat  $tmpFile3 | grep $instance |awk {'print $2'} `
+	#echo "$name | $status | $ip | $id | $size | $keypair| $volumes"
+	echo "*******************************************************"
+	echo "Instance name - status - IP - instance ID - Size - Keypair - Volumes"
+	echo "*******************************************************"
 	echo "$name | $status | $ip | $id | $size | $keypair| $volumes"
 	echo "---------------------------------------------------------------------" 
 done
+echo "if you want to make a volume snapshot after get the instances lists of the environment execute ec2-create-snapshot putherevol-id --description "Daily Backup""
