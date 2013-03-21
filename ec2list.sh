@@ -13,7 +13,7 @@ echo "Choose the environment that you want to get a instances inventory 1,2,3 "
 echo "1. Prod"
 echo "2. Staging"
 echo "3. Dev"
-echo "if you want to make a volume snapshot after get the instances lists of the environment execute ec2-create-snapshot putherevol-id --description "Daily Backup""
+echo "if you want to make a volume snapshot after get the instances lists of the environment execute ec2-create-snapshot putherevol-id --description \"Daily Backup\""
 read answer
 echo "Searching instances"
 #set the keypair regarding to the choice of the user
@@ -57,4 +57,4 @@ echo "You have $numOfInstances instances running  that fit in your search runnin
 	echo "$name | $status | $ip | $id | $size | $keypair| $volumes"
 	echo "---------------------------------------------------------------------" 
 done
-echo "if you want to make a volume snapshot after get the instances lists of the environment execute ec2-create-snapshot putherevol-id --description "Daily Backup""
+echo "if you want to make a volume snapshot after get the instances lists of the environment execute ec2-create-snapshot puthevol-id --description \"Daily Backup\""
