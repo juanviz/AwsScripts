@@ -1,5 +1,4 @@
 #!/bin/bash
-#i-c138d3b3 stopped stapp m1.medium 10.234.3.247
 #keypairs of each environment
 keypairdev="integ"
 keypairprod="stapp|stdb|vpc-public-10-234-1"
@@ -47,7 +46,6 @@ echo "You have $numOfInstances instances running  that fit in your search runnin
 	#TAG     instance        i-da0ac0a9      Name    STAGING-public-webserver2
 	name=`cat  $tmpFile2 | grep $instance |awk {'print $5'} `
 	#name=`cat $tmpFile  | grep $instance | awk {' print $6 '}`
-        #prodapp-type2-smp5 -  running - 10.234.3.76 - i-8b12fcf9 - m1.xlarge stapp
 	#volumes=`ec2-describe-instance-attribute $instance -b`
 	volumes=`cat  $tmpFile3 | grep $instance |awk {'print $2'} `
 	#echo "$name | $status | $ip | $id | $size | $keypair| $volumes"
