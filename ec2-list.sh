@@ -21,7 +21,7 @@ if [ "$1" = "Staging" ];then
 elif [ "$1" = "Dev" ];then
 	keypair=$keypairdev
 elif [ "$1" = "Prod" ];then
-	keypair=$keypairdev
+	keypair=$keypairprod
 else 
 	echo "Invalid environment. Valid environments are Prod, Staging and Dev"
 	echo "Example: $0 Staging"

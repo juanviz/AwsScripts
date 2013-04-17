@@ -7,7 +7,7 @@
 #if not change keypair variable for the field which identify the environment of the server
 #keypairs of each environment
 keypairdev="integ"
-keypairprod="stapp|stdb|vpc-public-10-234-1"
+#keypairprod="stapp|stdb|vpc-public-10-234-1"
 keypairstage="scp-staging"
 #temporal files to handle AWS data get with ec2tools
 tmpFile="/tmp/ec2.info"
