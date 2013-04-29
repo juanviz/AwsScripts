@@ -14,7 +14,7 @@ tmpFile="/tmp/ec2.info"
 tmpFile2="/tmp/ec2tags.info"
 tmpFile3="/tmp/ec2volumes.info"
 keypair="none"
-
+echo "Turning staging off" > /tmp/staging.log
 if [ "$1" = "Staging" ];then 
 	keypair=$keypairstage
 
@@ -30,7 +30,7 @@ if [ "$keypair" != "none" ];
 #it gets all the volumes per instances and save in a temporal file
 ec2Info=`ec2-describe-volumes > $tmpFile3`
 #it gets all of the instances with the chosen keypair that identify servers of one environment
-ec2Info= $(ec2-describe-instances |grep INSTANCE | egrep $keypair| awk {'print $2, $4, $5, $7,  $12, $NF'} > $tmpFile)
+ec2Info= $(ec2-describe-instances |grep INSTANCE | egrep $keypair| awk {'print $2, $4, $5, $7,  $12, $NF'} | grep -v redis| grep -v mongo > $tmpFile)
 #get the tag with the name of the machines in a different temporal file
  ec2name=`ec2-describe-tags --filter "resource-type=instance"  > $tmpFile2 `
   #pending to mix these 3 temporal files in one or put in an array to improve the performance
@@ -56,8 +56,10 @@ echo "Shutdown instances"
 	#volumes=`ec2-describe-instance-attribute $instance -b`
 	volumes=`cat  $tmpFile3 | grep $instance |awk {'print $2'} `
 	#echo "$name | $status | $ip | $id | $size | $keypair| $volumes"
-	echo "instance $name with ip $ip is about to be halted"
+	echo "instance $name with ip $ip is about to be halted" >> /tmp/staging.log
 	echo "ec2-stop-instances $id"
 done
 else echo "Nothing to do"
 fi
+ #cat /tmp/stqging.log| mutt -s "Turning Staging off" -a /tmp/staging.log -- juan.vicente.herrera@gmail.com
+
