@@ -7,7 +7,6 @@
 #if not change keypair variable for the field which identify the environment of the server
 #keypairs of each environment
 keypairdev="integ"
-#keypairprod="stapp|stdb|vpc-public-10-234-1"
 keypairstage="scp-staging"
 #temporal files to handle AWS data get with ec2tools
 tmpFile="/tmp/ec2.info"
@@ -22,7 +21,7 @@ elif [ "$1" = "Dev" ];then
 	keypair=$keypairdev
 
 else 
-	echo "Invalid environment. Valid environments are Prod, Staging and Dev"
+	echo "Invalid environment. Valid environments are  Staging and Dev"
 	echo "Example: $0 Staging"
 fi
 if [ "$keypair" != "none" ];
@@ -33,8 +32,6 @@ ec2Info=`ec2-describe-volumes > $tmpFile3`
 ec2Info= $(ec2-describe-instances |grep INSTANCE | egrep $keypair| awk {'print $2, $4, $5, $7,  $12, $NF'} | grep -v redis| grep -v mongo > $tmpFile)
 #get the tag with the name of the machines in a different temporal file
  ec2name=`ec2-describe-tags --filter "resource-type=instance"  > $tmpFile2 `
-  #pending to mix these 3 temporal files in one or put in an array to improve the performance
-
 #get the instances id stored in the temporal file that contains the servers of the chosen environment 
  nstances=`cat $tmpFile |  awk {'print $1'}`
 #count the number of instances that are part of the chosen environment 
@@ -50,10 +47,7 @@ echo "Shutdown instances"
 	ip=`cat $tmpFile |  grep $instance | awk {' print $5 '}`
     id=$instance
 	size=`cat $tmpFile  | grep $instance | awk {' print $4 '}`
-	#TAG     instance        i-da0ac0a9      Name    STAGING-public-webserver2
 	name=`cat  $tmpFile2 | grep $instance |awk {'print $5'} `
-	#name=`cat $tmpFile  | grep $instance | awk {' print $6 '}`
-	#volumes=`ec2-describe-instance-attribute $instance -b`
 	volumes=`cat  $tmpFile3 | grep $instance |awk {'print $2'} `
 	#echo "$name | $status | $ip | $id | $size | $keypair| $volumes"
 	echo "instance $name with ip $ip is about to be halted" >> /tmp/staging.log
@@ -61,5 +55,4 @@ echo "Shutdown instances"
 done
 else echo "Nothing to do"
 fi
- #cat /tmp/stqging.log| mutt -s "Turning Staging off" -a /tmp/staging.log -- juan.vicente.herrera@gmail.com
 

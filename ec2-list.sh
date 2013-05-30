@@ -53,8 +53,6 @@ echo "You have $numOfInstances instances running  that fit in your search runnin
 	size=`cat $tmpFile  | grep $instance | awk {' print $4 '}`
 	#TAG     instance        i-da0ac0a9      Name    STAGING-public-webserver2
 	name=`cat  $tmpFile2 | grep $instance |awk {'print $5'} `
-	#name=`cat $tmpFile  | grep $instance | awk {' print $6 '}`
-	#volumes=`ec2-describe-instance-attribute $instance -b`
 	volumes=`cat  $tmpFile3 | grep $instance |awk {'print $2'} `
 	#echo "$name | $status | $ip | $id | $size | $keypair| $volumes"
 	echo "*******************************************************"
