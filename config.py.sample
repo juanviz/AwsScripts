@@ -1,0 +1,6 @@
+aws_access_key_id='xxxxxxxxxx'
+aws_secret_access_key='xxxxxxxxxxxxxxxxxxx'
+subnetDev = ["subnet-xxxxxxx",]
+subnetAll = ["subnet-xxxxxxx","subnet-xxxxxxx",]
+subnetStage = ["subnet-xxxxxxx","subnet-xxxxxxx",]
+subnetProd = ["subnet-xxxxxxx","subnet-xxxxxxx","subnet-xxxxxxx",]
