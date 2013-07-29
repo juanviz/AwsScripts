@@ -1,6 +1,11 @@
-aws_access_key_id='xxxxxxxxxx'
-aws_secret_access_key='xxxxxxxxxxxxxxxxxxx'
-subnetDev = ["subnet-xxxxxxx",]
-subnetAll = ["subnet-xxxxxxx","subnet-xxxxxxx",]
-subnetStage = ["subnet-xxxxxxx","subnet-xxxxxxx",]
-subnetProd = ["subnet-xxxxxxx","subnet-xxxxxxx","subnet-xxxxxxx",]
+aws_access_key_id='xxxxxxxxxxxx'
+aws_secret_access_key='xxxxxxxxxxxxxxxxxxxxxx'
+# These tags have to match with values of a Tag called "Env" in your instances
+TagDev = ["xxx",]
+# This array includes all of the values used in Tag "Env" for list, stop or start the whole platform
+TagAll = ["xxx,xxxx,xxxxx,"]
+TagStage = ["xxx",]
+TagProd = ["xxxx",]
+# If you want to avoid that some instances will be stopped or started by this script
+# set the instance id up in the following array and will not be stopped or started
+exclusions=["i-xxxxxxxxxxx",]

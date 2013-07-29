@@ -66,17 +66,17 @@ def build_instance_list(reservation):
 def write_instances(instance):
     regexes_es=config.exclusions
     if (str(sys.argv[2])=="Prod"):
-    	regexes = config.subnetProd
+    	regexes = config.TagProd
 
     	
     elif (str(sys.argv[2])=="Stage"):
-    	regexes = config.subnetStage
+    	regexes = config.TagStage
 
     		
     elif (str(sys.argv[2])=="Dev"):
-		regexes = config.subnetDev
+		regexes = config.TagDev
     elif (str(sys.argv[2])=="All"):
-    	regexes = config.subnetAll
+    	regexes = config.TagAll
 
     if (instance.tags.get('Env') is not None):
     	if instance.tags.get('Env')  in regexes:
