@@ -48,7 +48,7 @@ def main():
             print "list|start|stop are the only valid values"
             #print (str(sys.argv[1])
             sys.exit(2)     
-		if (str(sys.argv[1]) == "start" and str(sys.argv[2]) == "All"):
+        if (str(sys.argv[1]) == "start" and str(sys.argv[2]) == "All"):
             print "Invalid option. Not allow to start the whole platform without authorization"
             print "list|start|stop are the only valid values"
             #print (str(sys.argv[1])
@@ -58,7 +58,7 @@ def main():
 			print "list|start|stop are the only valid values"
 			#print (str(sys.argv[1])
 			sys.exit(2)			
-		if (str(sys.argv[2]) != "Prod" and str(sys.argv[2]) != "Dev" and str(sys.argv[2]) != "Stage" and str(sys.argv[2]) != "All"):
+        if (str(sys.argv[2]) != "Prod" and str(sys.argv[2]) != "Dev" and str(sys.argv[2]) != "Stage" and str(sys.argv[2]) != "All"):
 			print "Invalid option."
 			print "Prod|Stage|Dev|All are the only valid values"
 			sys.exit(2)	
