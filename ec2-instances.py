@@ -3,6 +3,8 @@
 # juanvicenteherrera.eu
 # requisites: boto python module installed
 # sudo pip install boto
+# script that start, stop or list the instances of an environment
+# All of the instances of an environment has to have a tag called "Env" with one of the values defined in the config.py file
 
 
  
@@ -56,7 +58,7 @@ def build_instance_list(reservation):
     map(write_instances,reservation.instances)
  
 def write_instances(instance):
-
+    regexes_es=config.exclusions
     if (str(sys.argv[2])=="Prod"):
     	regexes = config.subnetProd
 
@@ -66,30 +68,25 @@ def write_instances(instance):
 
     		
     elif (str(sys.argv[2])=="Dev"):
-		#regexes = [re.compile("subnet-63d1e508"),]
 		regexes = config.subnetDev
     elif (str(sys.argv[2])=="All"):
     	regexes = config.subnetAll
 
-    
-    #print instance.subnet_id
-    #print subnet1
-    if (instance.subnet_id is not None):
-    	#if any(instance.subnet_id for regex in regexes):
-    	if instance.subnet_id  in regexes:
-    	#if any(regex.match(instance.subnet_id) for regex in regexes):
-    	#if (instance.subnet_id == subnet1 or instance.subnet_id == subnet2 or instance.subnet_id == subnet3):
-    		csv_file.write("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n"%(instance.tags.get('Name'),instance.private_ip_address,instance.key_name,instance.id,instance.instance_type,instance.public_dns_name,
-                                          instance.state,instance.placement,instance.architecture, instance.platform))
-    		print ("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n"%(instance.tags.get('Name'),instance.private_ip_address,instance.key_name,instance.id,instance.instance_type,instance.public_dns_name, 
-    									  instance.state,instance.placement,instance.architecture, instance.platform))
-    		
-    		if (str(sys.argv[1])=="start"):
-    			instance.start
-    		elif (str(sys.argv[1])=="stop"):
-    			instance.stop		
-    			    #else:
-    	#print "Nothing to do"
+    if (instance.tags.get('Env') is not None):
+    	if instance.tags.get('Env')  in regexes:
+            csv_file.write("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n"%(instance.tags.get('Name'),instance.private_ip_address,instance.key_name,instance.id,instance.instance_type,instance.public_dns_name,instance.state,instance.placement,instance.architecture, instance.platform))
+            print ("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n"%(instance.tags.get('Name'),instance.private_ip_address,instance.key_name,instance.id,instance.instance_type,instance.public_dns_name, instance.state,instance.placement,instance.architecture, instance.platform))
+            if instance.id in regexes_es:
+                print "Excluido"
+            else:  
+                print "en marcha"  
+                if (str(sys.argv[1])=="start"):
+                    instance.start()
+                    print "starting"
+                elif (str(sys.argv[1])=="stop"):
+                    print instance.id
+                    instance.stop()      
+                    print "stopping"
     	                                      
     csv_file.flush()
         
