@@ -13,7 +13,7 @@
 # setting its instance id in "exclusions" array included in config.py
 
 
- 
+import boto.ec2
 from boto.ec2 import EC2Connection
 import sys
 import re
@@ -63,12 +63,16 @@ def main():
 			print "Prod|Stage|Dev|All are the only valid values"
 			sys.exit(2)	
 
-    	connection = EC2Connection(aws_access_key_id=config.aws_access_key_id,aws_secret_access_key=config.aws_secret_access_key)
-    	process_instance_list(connection)
+    	#connection = EC2Connection(aws_access_key_id=config.aws_access_key_id,aws_secret_access_key=config.aws_secret_access_key)
+	regions = boto.ec2.regions()
+	eu = regions[7]
+	print eu
+	conn_eu = eu.connect(aws_access_key_id=config.aws_access_key_id,aws_secret_access_key=config.aws_secret_access_key)
+    	process_instance_list(conn_eu)
     	csv_file.close()
 
-def process_instance_list(connection):
-    map(build_instance_list,connection.get_all_instances())
+def process_instance_list(conn_eu):
+    map(build_instance_list,conn_eu.get_all_instances())
  
 def build_instance_list(reservation):
     map(write_instances,reservation.instances)
