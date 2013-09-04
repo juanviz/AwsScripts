@@ -1,11 +1,14 @@
+maintainer       "Juan Vicente Herrera"
+
+maintainer_email "juan.vicente.herrera@gmail.com"
+
+license          "GPL"
+
 AwsScripts
 ==========
 
  Scripts to ease the way to execute some common and frequent operations related to your AWS services
  
- author: Juan Vicente Herrera 
- 
- juanvicenteherrera.eu
 
 ec2-instances.py
 ==========
