@@ -8,7 +8,13 @@ AwsScripts
 ==========
 
  Scripts to ease the way to execute some common and frequent operations related to your AWS services
- 
+
+Cloudformation
+
+==========
+
+Json files that creates the desired resources in your AWS account
+
 
 ec2-instances.py
 ==========
