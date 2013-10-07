@@ -1,0 +1,240 @@
+ {
+    "AWSTemplateFormatVersion" : "2013-07-10",
+    "Description" : "Template which creates a public and private subnet for a new environment with its required resources included NAT instance and Load Balancer with AppCookieStickinessPolicy",
+  
+#### Parameters block defines the inputs that the operator has to fill with the right values for the environments resources that we are going to create
+#### For example the keypair  of the NAT instance.
+ 
+"Parameters" : {
+    "InstanceType" : {
+        "Description" : "NAT instance type",
+        "Type" : "String",
+        "Default" : "m1.small",
+        "AllowedValues" : [ "t1.micro","m1.small","m1.medium","m1.large","m1.xlarge","m2.xlarge","m2.2xlarge","m2.4xlarge","m3.xlarge","m3.2xlarge","c1.medium","c1.xlarge","cc1.4xlarge","cc2.8xlarge","cg1.4xlarge"],
+        "ConstraintDescription" : "must be a valid EC2 instance type."
+      },
+    "WebServerPort" : {
+        "Description" : "TCP/IP port of the balanced web server",
+        "Type" : "String",
+        "Default" : "80"
+      },
+      "AppCookieName" : {
+        "Description" : "Name of the cookie for ELB AppCookieStickinessPolicy",
+        "Type" : "String",
+        "Default" : "Juanvi"
+      },
+      "KeyName" : {
+        "Description" : "Name of an existing EC2 KeyPair to enable SSH access to the NAT instance",
+        "Type" : "String"
+      }
+    },
+ 
+#### Data used in the creation of the NAT instance. The arch (32 or 64 bits) depends on the size chosen for the instance
+    "Mappings" : {
+      "AWSInstanceType2Arch" : {
+        "t1.micro"    : { "Arch" : "32" },
+        "m1.small"    : { "Arch" : "64" },
+        "m1.medium"   : { "Arch" : "64" },
+        "m1.large"    : { "Arch" : "64" },
+        "m1.xlarge"   : { "Arch" : "64" },
+        "m2.xlarge"   : { "Arch" : "64" },
+        "m2.2xlarge"  : { "Arch" : "64" },
+        "m2.4xlarge"  : { "Arch" : "64" },
+        "m3.xlarge"   : { "Arch" : "64" },
+        "m3.2xlarge"  : { "Arch" : "64" },
+        "c1.medium"   : { "Arch" : "64" },
+        "c1.xlarge"   : { "Arch" : "64" }
+      },
+#### Data used in the creation of the NAT instance. The AMI ID depends on the region chosen for the instance
+ 
+  "AWSRegionArch2AMI" : {
+        "eu-west-1"      : { "32" : "ami-1de2d969", "64" : "ami-1de2d969", "64HVM" : "NOT_YET_SUPPORTED" }
+      }
+    },
+#### Here begins the definition of the resources that we want to create
+    "Resources" : {
+#### Creation of the public subnet
+      "PublicSubnet" : {
+        "Type" : "AWS::EC2::Subnet",
+        "Properties" : {
+          "VpcId" : "yourvpcid",
+          "CidrBlock" : "172.20.1.32/27",
+          "Tags" : [
+            {"Key" : "Application", "Value" : { "Ref" : "AWS::StackId"} },
+            {"Key" : "Network", "Value" : "Public" }
+          ]
+        }
+      },
+#### Assignation of the existing route table created manually to public subnet
+      "PublicSubnetRouteTableAssociation" : {
+        "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+        "Properties" : {
+          "SubnetId" : { "Ref" : "PublicSubnet" },
+          "RouteTableId" : "rtb-xxxxx"
+        }
+      },
+#### Assignation of the existing ACL table created manually to public subnet
+ 
+ 
+      "PublicSubnetNetworkAclAssociation" : {
+        "Type" : "AWS::EC2::SubnetNetworkAclAssociation",
+        "Properties" : {
+          "SubnetId" : { "Ref" : "PublicSubnet" },
+          "NetworkAclId" : "acl-xxxxxx"
+        }
+      },
+#### Creation of the private subnet   
+      "PrivateSubnet" : {
+        "Type" : "AWS::EC2::Subnet",
+        "Properties" : {
+          "VpcId" : "vpc-a31de1c8",
+          "CidrBlock" : "172.20.65.0/24",
+          "Tags" : [
+            {"Key" : "Application", "Value" : { "Ref" : "AWS::StackId"} },
+            {"Key" : "Network", "Value" : "Private" }
+          ]
+        }
+      },
+#### Assignation of the existing route table created manually to private subnet
+ 
+      "PrivateSubnetRouteTableAssociation" : {
+        "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+        "Properties" : {
+          "SubnetId" : { "Ref" : "PrivateSubnet" },
+          "RouteTableId" : "rtb-baa892d1"
+        }
+      },
+#### Assignation of the existing ACL table created manually to private subnet
+ 
+ 
+      "PrivateSubnetNetworkAclAssociation" : {
+        "Type" : "AWS::EC2::SubnetNetworkAclAssociation",
+        "Properties" : {
+          "SubnetId" : { "Ref" : "PrivateSubnet" },
+          "NetworkAclId" : "acl-xxxxxxx"
+        }
+      },
+#### Added new route in private route table for send all of the public traffic to internet through the recent created NAT instance
+         "PrivateRoute" : {
+        "Type" : "AWS::EC2::Route",
+        "Properties" : {
+          "RouteTableId" : "rtb-xxxxx",
+          "DestinationCidrBlock" : "0.0.0.0/0",
+          "InstanceId" : { "Ref" : "NATDevice" }
+        }
+      },
+##### Creation of the ELB for balance traffic to front web servers, created in the public subnet previously created
+  "ElasticLoadBalancer" : {
+      
+        "Type" : "AWS::ElasticLoadBalancing::LoadBalancer",
+        "Properties" : {
+          "SecurityGroups" : [ { "Ref" : "LoadBalancerSecurityGroup" } ],
+          "Subnets" : [ { "Ref" : "PublicSubnet" } ],
+          "AppCookieStickinessPolicy" : [{
+            "PolicyName" : "BooksLBPolicy",
+            "CookieName" : { "Ref" : "AppCookieName" }
+          } ],
+          "Listeners" : [ {
+            "LoadBalancerPort" : "80",
+            "InstancePort" : { "Ref" : "WebServerPort" },
+            "Protocol" : "HTTP",
+            "PolicyNames" : [ "BooksLBPolicy" ]
+          } ],
+          "HealthCheck" : {
+            "Target" : { "Fn::Join" : [ "", ["HTTP:", { "Ref" : "WebServerPort" }, "/"]]},
+            "HealthyThreshold" : "3",
+            "UnhealthyThreshold" : "5",
+            "Interval" : "30",
+            "Timeout" : "5"
+          }
+        }
+      },
+##### Creation of the ELB for balance traffic to front web servers, created in the private subnet previously created
+ 
+ 
+      "ElasticLoadBalancerBackend" : {
+      
+        "Type" : "AWS::ElasticLoadBalancing::LoadBalancer",
+        "Properties" : {
+          "SecurityGroups" : [ { "Ref" : "LoadBalancerSecurityGroup" } ],
+          "Subnets" : [ { "Ref" : "PrivateSubnet" } ],
+          "AppCookieStickinessPolicy" : [{
+            "PolicyName" : "BooksLBPolicy",
+            "CookieName" : { "Ref" : "AppCookieName" }
+          } ],
+          "Listeners" : [ {
+            "LoadBalancerPort" : "80",
+            "InstancePort" : { "Ref" : "WebServerPort" },
+            "Protocol" : "HTTP",
+            "PolicyNames" : [ "BooksLBPolicy" ]
+          } ],
+          "HealthCheck" : {
+            "Target" : { "Fn::Join" : [ "", ["HTTP:", { "Ref" : "WebServerPort" }, "/"]]},
+            "HealthyThreshold" : "3",
+            "UnhealthyThreshold" : "5",
+            "Interval" : "30",
+            "Timeout" : "5"
+          }
+        }
+      },
+#### Elastic ip attached to previously created NAT instance
+      "NATIPAddress" : {
+        "Type" : "AWS::EC2::EIP",
+        "Properties" : {
+          "Domain" : "vpc",
+          "InstanceId" : { "Ref" : "NATDevice" }
+        }
+      },
+#### Creation of the NAT instance
+      "NATDevice" : {
+        "Type" : "AWS::EC2::Instance",
+        "Properties" : {
+          "InstanceType" : { "Ref" : "InstanceType" },
+          "KeyName" : { "Ref" : "KeyName" },
+          "SubnetId" : { "Ref" : "PublicSubnet" },
+          "SourceDestCheck" : "false",
+           "ImageId" : { "Fn::FindInMap" : [ "AWSRegionArch2AMI", { "Ref" : "AWS::Region" }, 
+                                            { "Fn::FindInMap" : [ "AWSInstanceType2Arch", { "Ref" : "InstanceType" }, "Arch" ] } ] },
+           "Tags" : [
+            {"Key" : "Name", "Value" : "nat.public-staging-books" }
+          ],
+          "SecurityGroupIds" : [{ "Ref" : "NATSecurityGroup" }]
+        }
+      },
+#### Creation of the security group for NAT instance previously created
+       "NATSecurityGroup" : {
+        "Type" : "AWS::EC2::SecurityGroup",
+        "Properties" : {
+          "GroupDescription" : "Enable internal access to the staging NAT device",
+          "VpcId" : "vpc-a31de1c8",
+          "SecurityGroupIngress" : [
+             { "IpProtocol" : "tcp", "FromPort" : "80",  "ToPort" : "80",  "CidrIp" : "0.0.0.0/0"} ,
+             { "IpProtocol" : "tcp", "FromPort" : "443", "ToPort" : "443", "CidrIp" : "0.0.0.0/0"} ,
+             { "IpProtocol" : "tcp", "FromPort" : "22",  "ToPort" : "22",  "CidrIp" : "0.0.0.0/0"} ],
+          "SecurityGroupEgress" : [
+             { "IpProtocol" : "tcp", "FromPort" : "80",  "ToPort" : "80",  "CidrIp" : "0.0.0.0/0"} ,
+             { "IpProtocol" : "tcp", "FromPort" : "443", "ToPort" : "443", "CidrIp" : "0.0.0.0/0"} , 
+             { "IpProtocol" : "udp", "FromPort" : "53", "ToPort" : "53", "CidrIp" : "0.0.0.0/0"} ]
+        }
+      },
+#### Creation of the security group for ELB previously created
+      "LoadBalancerSecurityGroup" : {
+        "Type" : "AWS::EC2::SecurityGroup",
+        "Properties" : {
+          "GroupDescription" : "Enable HTTP access on port 80 and 443",
+          "VpcId" : "vpc-a31de1c8",
+          "SecurityGroupIngress" : [ { "IpProtocol" : "tcp", "FromPort" : "80", "ToPort" : "80", "CidrIp" : "0.0.0.0/0" } ],
+          "SecurityGroupEgress" : [ { "IpProtocol" : "tcp", "FromPort" : "80", "ToPort" : "80", "CidrIp" : "0.0.0.0/0"} ],
+          "SecurityGroupIngress" : [ { "IpProtocol" : "tcp", "FromPort" : "443", "ToPort" : "443", "CidrIp" : "0.0.0.0/0" } ],
+          "SecurityGroupEgress" : [ { "IpProtocol" : "tcp", "FromPort" : "443", "ToPort" : "443", "CidrIp" : "0.0.0.0/0"} ]
+        }
+      }
+    },
+#### Outputs parameters as result of the stack's execution that we want to save as stack's information 
+    "Outputs" : {
+      "URL" : {
+        "Description" : "URL of the website",
+        "Value" :  { "Fn::Join" : [ "", [ "http://", { "Fn::GetAtt" : [ "ElasticLoadBalancer", "DNSName" ]}]]}
+      }
+    }
+  }
