@@ -54,6 +54,16 @@
 #### Here begins the definition of the resources that we want to create
     "Resources" : {
 #### Creation of the public subnet
+       "VPC" : {
+      "Type" : "AWS::EC2::VPC",
+      "Properties" : {
+        "CidrBlock" : "172.20.0.0/16",
+        "Tags" : [
+          {"Key" : "Application", "Value" : { "Ref" : "AWS::StackId"} },
+          {"Key" : "Network", "Value" : "Public" }
+        ]
+      }
+    },
       "PublicSubnet" : {
         "Type" : "AWS::EC2::Subnet",
         "Properties" : {
