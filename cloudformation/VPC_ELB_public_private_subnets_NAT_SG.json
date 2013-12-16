@@ -1,11 +1,7 @@
  {
     "AWSTemplateFormatVersion" : "2013-07-10",
     "Description" : "Template which creates a public and private subnet for a new environment with its required resources included NAT instance and Load Balancer with AppCookieStickinessPolicy",
-  
-#### Parameters block defines the inputs that the operator has to fill with the right values for the environments resources that we are going to create
-#### For example the keypair  of the NAT instance.
- 
-"Parameters" : {
+ "Parameters" : {
     "InstanceType" : {
         "Description" : "NAT instance type",
         "Type" : "String",
@@ -28,8 +24,6 @@
         "Type" : "String"
       }
     },
- 
-#### Data used in the creation of the NAT instance. The arch (32 or 64 bits) depends on the size chosen for the instance
     "Mappings" : {
       "AWSInstanceType2Arch" : {
         "t1.micro"    : { "Arch" : "32" },
@@ -45,13 +39,10 @@
         "c1.medium"   : { "Arch" : "64" },
         "c1.xlarge"   : { "Arch" : "64" }
       },
-#### Data used in the creation of the NAT instance. The AMI ID depends on the region chosen for the instance
- 
   "AWSRegionArch2AMI" : {
         "eu-west-1"      : { "32" : "ami-1de2d969", "64" : "ami-1de2d969", "64HVM" : "NOT_YET_SUPPORTED" }
       }
     },
-#### Here begins the definition of the resources that we want to create
     "Resources" : {
 #### Creation of the public subnet
        "VPC" : {
@@ -75,7 +66,6 @@
           ]
         }
       },
-#### Assignation of the existing route table created manually to public subnet
       "PublicSubnetRouteTableAssociation" : {
         "Type" : "AWS::EC2::SubnetRouteTableAssociation",
         "Properties" : {
@@ -83,9 +73,6 @@
           "RouteTableId" : "rtb-xxxxx"
         }
       },
-#### Assignation of the existing ACL table created manually to public subnet
- 
- 
       "PublicSubnetNetworkAclAssociation" : {
         "Type" : "AWS::EC2::SubnetNetworkAclAssociation",
         "Properties" : {
@@ -93,7 +80,6 @@
           "NetworkAclId" : "acl-xxxxxx"
         }
       },
-#### Creation of the private subnet   
       "PrivateSubnet" : {
         "Type" : "AWS::EC2::Subnet",
         "Properties" : {
@@ -105,8 +91,6 @@
           ]
         }
       },
-#### Assignation of the existing route table created manually to private subnet
- 
       "PrivateSubnetRouteTableAssociation" : {
         "Type" : "AWS::EC2::SubnetRouteTableAssociation",
         "Properties" : {
@@ -114,9 +98,6 @@
           "RouteTableId" : "rtb-baa892d1"
         }
       },
-#### Assignation of the existing ACL table created manually to private subnet
- 
- 
       "PrivateSubnetNetworkAclAssociation" : {
         "Type" : "AWS::EC2::SubnetNetworkAclAssociation",
         "Properties" : {
@@ -124,7 +105,6 @@
           "NetworkAclId" : "acl-xxxxxxx"
         }
       },
-#### Added new route in private route table for send all of the public traffic to internet through the recent created NAT instance
          "PrivateRoute" : {
         "Type" : "AWS::EC2::Route",
         "Properties" : {
@@ -133,7 +113,6 @@
           "InstanceId" : { "Ref" : "NATDevice" }
         }
       },
-##### Creation of the ELB for balance traffic to front web servers, created in the public subnet previously created
   "ElasticLoadBalancer" : {
       
         "Type" : "AWS::ElasticLoadBalancing::LoadBalancer",
@@ -159,9 +138,6 @@
           }
         }
       },
-##### Creation of the ELB for balance traffic to front web servers, created in the private subnet previously created
- 
- 
       "ElasticLoadBalancerBackend" : {
       
         "Type" : "AWS::ElasticLoadBalancing::LoadBalancer",
@@ -187,7 +163,6 @@
           }
         }
       },
-#### Elastic ip attached to previously created NAT instance
       "NATIPAddress" : {
         "Type" : "AWS::EC2::EIP",
         "Properties" : {
@@ -195,7 +170,6 @@
           "InstanceId" : { "Ref" : "NATDevice" }
         }
       },
-#### Creation of the NAT instance
       "NATDevice" : {
         "Type" : "AWS::EC2::Instance",
         "Properties" : {
@@ -211,7 +185,6 @@
           "SecurityGroupIds" : [{ "Ref" : "NATSecurityGroup" }]
         }
       },
-#### Creation of the security group for NAT instance previously created
        "NATSecurityGroup" : {
         "Type" : "AWS::EC2::SecurityGroup",
         "Properties" : {
@@ -227,7 +200,6 @@
              { "IpProtocol" : "udp", "FromPort" : "53", "ToPort" : "53", "CidrIp" : "0.0.0.0/0"} ]
         }
       },
-#### Creation of the security group for ELB previously created
       "LoadBalancerSecurityGroup" : {
         "Type" : "AWS::EC2::SecurityGroup",
         "Properties" : {
@@ -240,7 +212,6 @@
         }
       }
     },
-#### Outputs parameters as result of the stack's execution that we want to save as stack's information 
     "Outputs" : {
       "URL" : {
         "Description" : "URL of the website",
